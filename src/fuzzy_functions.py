@@ -19,26 +19,26 @@ class FuzzyMethods:
         peha_abnm = self.df.loc[self.df['Ph'] < 7.1, "Ph"]
         peha_sussy = self.df.loc[(self.df.loc[:, 'Ph'] >= 7.1) & (self.df.loc[:, 'Ph'] <= 7.2), "Ph"]
 
-        self.ph[self.labels[0]] = fuzz.gaussmf(self.ph.universe, float(np.mean(peha_norm)), float(np.std(peha_norm)))
-        self.ph[self.labels[2]] = fuzz.gaussmf(self.ph.universe, float(np.mean(peha_sussy)), float(np.std(peha_sussy)))
-        self.ph[self.labels[1]] = fuzz.gaussmf(self.ph.universe, float(np.mean(peha_abnm)), float(np.std(peha_abnm)))
+        self.ph[self.labels[0]] = fuzz.gaussmf(self.ph.universe, np.mean(peha_norm), np.std(peha_norm))
+        self.ph[self.labels[2]] = fuzz.gaussmf(self.ph.universe, np.mean(peha_sussy), np.std(peha_sussy))
+        self.ph[self.labels[1]] = fuzz.gaussmf(self.ph.universe, np.mean(peha_abnm), np.std(peha_abnm))
 
     def membership_fun_BW(self):
         bewu_norm = self.df.loc[self.df["Percentile"] >= 10, "Percentile"]
         bewu_abnm = self.df.loc[self.df['Percentile'] <= 5, 'Percentile']
         bewu_sussy = self.df.loc[(self.df['Percentile'] < 10) & (self.df['Percentile'] > 5), 'Percentile']
-        self.BW[self.labels[0]] = fuzz.gaussmf(self.BW.universe, float(np.mean(bewu_norm)), float(np.std(bewu_norm)))
-        self.BW[self.labels[2]] = fuzz.gaussmf(self.BW.universe, float(np.mean(bewu_sussy)), float(np.std(bewu_sussy)))
-        self.BW[self.labels[1]] = fuzz.gaussmf(self.BW.universe, float(np.mean(bewu_abnm)), float(np.std(bewu_abnm)))
+        self.BW[self.labels[0]] = fuzz.gaussmf(self.BW.universe, np.mean(bewu_norm), np.std(bewu_norm))
+        self.BW[self.labels[2]] = fuzz.gaussmf(self.BW.universe, np.mean(bewu_sussy), np.std(bewu_sussy))
+        self.BW[self.labels[1]] = fuzz.gaussmf(self.BW.universe, np.mean(bewu_abnm), np.std(bewu_abnm))
 
     def membership_fun_AP(self):
         ape_norm = self.df.loc[self.df["Apgar"] >= 7, "Apgar"]
         ape_abnm = self.df.loc[self.df['Apgar'] < 5, 'Apgar']
         ape_sussy = self.df.loc[(self.df['Apgar'] < 7) & (self.df['Apgar'] >= 5), 'Apgar']
 
-        self.AP[self.labels[0]] = fuzz.gaussmf(self.AP.universe, float(np.mean(ape_norm)), float(np.std(ape_norm)))
-        self.AP[self.labels[2]] = fuzz.gaussmf(self.AP.universe, float(np.mean(ape_abnm)), float(np.std(ape_abnm)))
-        self.AP[self.labels[1]] = fuzz.gaussmf(self.AP.universe, float(np.mean(ape_sussy)), float(np.std(ape_sussy)))
+        self.AP[self.labels[0]] = fuzz.gaussmf(self.AP.universe, np.mean(ape_norm), np.std(ape_norm))
+        self.AP[self.labels[2]] = fuzz.gaussmf(self.AP.universe, np.mean(ape_abnm), np.std(ape_abnm))
+        self.AP[self.labels[1]] = fuzz.gaussmf(self.AP.universe, np.mean(ape_sussy), np.std(ape_sussy))
 
     def make_plots(self):
 
