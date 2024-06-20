@@ -6,12 +6,13 @@ import matplotlib.pyplot as plt
 from skfuzzy import control as ctrl
 
 
+
 class FuzzyMethods:
     def __init__(self, file_name="FDA_data.xls"):
         self.df = pd.read_excel(io=os.path.join(os.getcwd(), file_name))
-        self.BW = ctrl.Antecedent(self.df.iloc[:, 0], label="Percentile")
-        self.AP = ctrl.Antecedent(self.df.iloc[:, 1], label="Apgar")
-        self.ph = ctrl.Antecedent(self.df.iloc[:, 2], label="Ph")
+        self.BW = ctrl.Antecedent(np.linspace(min(self.df.iloc[:, 0]), max(self.df.iloc[:, 0]), 200), label="Percentile")
+        self.AP = ctrl.Antecedent(np.linspace(min(self.df.iloc[:, 1]), max(self.df.iloc[:, 1]), 200), label="Apgar")
+        self.ph = ctrl.Antecedent(np.linspace(min(self.df.iloc[:,2]), max(self.df.iloc[:, 2]), 200), label="Ph")
         self.labels = ("Normal", "Suspicious", "Abnormal")
 
     def membership_fun_ph(self):
@@ -27,6 +28,8 @@ class FuzzyMethods:
         bewu_norm = self.df.loc[self.df["Percentile"] >= 10, "Percentile"]
         bewu_abnm = self.df.loc[self.df['Percentile'] <= 5, 'Percentile']
         bewu_sussy = self.df.loc[(self.df['Percentile'] < 10) & (self.df['Percentile'] > 5), 'Percentile']
+        print(bewu_sussy)
+
         self.BW[self.labels[0]] = fuzz.gaussmf(self.BW.universe, np.mean(bewu_norm), np.std(bewu_norm))
         self.BW[self.labels[2]] = fuzz.gaussmf(self.BW.universe, np.mean(bewu_sussy), np.std(bewu_sussy))
         self.BW[self.labels[1]] = fuzz.gaussmf(self.BW.universe, np.mean(bewu_abnm), np.std(bewu_abnm))

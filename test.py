@@ -21,11 +21,12 @@ BW = ctrl.Antecedent(np.linspace(min(bw_values), max(bw_values), 100), 'Percenti
 AP = ctrl.Antecedent(np.linspace(min(ap_values), max(ap_values), 100), 'Apggar')
 PH = ctrl.Antecedent(np.linspace(min(ph_values), max(ph_values), 100), 'Ph')
 
-# membership functions
+# membership functions for bodyweight
 BW_normal = dataset.loc[dataset["Percentile"] >= 10, "Percentile"]
 BW_sussy = dataset.loc[(dataset['Percentile'] < 10) & (dataset['Percentile'] > 5), 'Percentile']
 BW_abnormal = dataset.loc[dataset['Percentile'] <= 5, 'Percentile']
 
+# membership function for apgar
 AP_normal = dataset.loc[dataset["Apgar"] >= 7, "Apgar"]
 AP_sussy = dataset.loc[(dataset['Apgar'] < 7) & (dataset['Apgar'] >= 5), 'Apgar']
 AP_abnormal = dataset.loc[dataset['Apgar'] < 5, 'Apgar']
