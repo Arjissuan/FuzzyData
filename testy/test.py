@@ -9,7 +9,7 @@ import os
 # Generate universe variables
 # * Quality and service on subjective ranges [0, 10]
 # * Tip has a range of [0, 25] in units of percentage points
-dataset = pd.read_excel(io=os.path.join(os.getcwd(), "FDA_data.xls"))
+dataset = pd.read_excel(io=os.path.join(os.getcwd(), "../FDA_data.xls"))
 print(dataset.loc[dataset["Ph"] < 7.1, "Ph"])
 
 labels = ("Percentile", "Apgar", "Ph")
@@ -17,7 +17,7 @@ bw_values = dataset["Percentile"].values
 ap_values = dataset["Apgar"].values
 ph_values = dataset["Ph"].values
 
-BW = ctrl.Antecedent(np.linspace(min(bw_values), max(bw_values), 100)    , 'Percentile')
+BW = ctrl.Antecedent(np.linspace(min(bw_values), max(bw_values), 100), 'Percentile')
 AP = ctrl.Antecedent(np.linspace(min(ap_values), max(ap_values), 100), 'Apggar')
 PH = ctrl.Antecedent(np.linspace(min(ph_values), max(ph_values), 100), 'Ph')
 

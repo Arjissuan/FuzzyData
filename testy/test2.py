@@ -6,7 +6,7 @@ from skfuzzy import control as ctrl
 percentile = ctrl.Antecedent(np.arange(0, 101, 1), 'percentile')
 apgar = ctrl.Antecedent(np.arange(0, 11, 1), 'apgar')
 ph = ctrl.Antecedent(np.arange(6.5, 8.0, 0.01), 'ph')
-outcome = ctrl.Consequent(np.arange(0, 2, 1), 'outcome')
+outcome = ctrl.Consequent(np.arange(0, 4, 1), 'outcome')
 
 # Define fuzzy sets and membership functions for each input
 percentile['low'] = fuzz.trapmf(percentile.universe, [0, 0, 20, 40])
@@ -22,15 +22,16 @@ ph['normal'] = fuzz.trimf(ph.universe, [7.1, 7.3, 7.4])
 ph['high'] = fuzz.trapmf(ph.universe, [7.3, 7.5, 8.0, 8.0])
 
 # Define the output fuzzy set
-outcome['bad'] = fuzz.trapmf(outcome.universe, [0, 0, 0.5, 1])
-outcome['good'] = fuzz.trapmf(outcome.universe, [0.5, 1, 2, 2])
+outcome['bad'] = fuzz.trapmf(outcome.universe, [0, 0, 1, 1.5])
+outcome['average'] = fuzz.trapmf(outcome.universe, [1, 1.5, 2.5, 3])
+outcome['good'] = fuzz.trapmf(outcome.universe, [2, 2.5, 3, 3])
 
 # Define fuzzy rules
 rule1 = ctrl.Rule(percentile['low'] & apgar['low'] & ph['low'], outcome['bad'])
-rule2 = ctrl.Rule(percentile['medium'] & apgar['medium'] & ph['normal'], outcome['good'])
+rule2 = ctrl.Rule(percentile['medium'] & apgar['medium'] & ph['normal'], outcome['average'])
 rule3 = ctrl.Rule(percentile['high'] & apgar['high'] & ph['high'], outcome['good'])
 rule4 = ctrl.Rule(apgar['low'] | ph['low'], outcome['bad'])
-rule5 = ctrl.Rule(apgar['high'] & ph['normal'], outcome['good'])
+rule5 = ctrl.Rule(apgar['high'] & ph['normal'], outcome['average'])
 
 # Create control system and simulation
 outcome_ctrl = ctrl.ControlSystem([rule1, rule2, rule3, rule4, rule5])
@@ -38,9 +39,9 @@ outcome_sim = ctrl.ControlSystemSimulation(outcome_ctrl)
 
 # Example input
 example_data = {
-    'percentile': 49,
-    'apgar': 7,
-    'ph': 7.28
+    'percentile': 9,
+    'apgar': 9,
+    'ph': 7.6
 }
 
 # Fuzzification
@@ -56,4 +57,6 @@ result = outcome_sim.output['outcome']
 print(f"Fuzzy outcome: {result}")
 
 # Output the crisp result
-print(f"Defuzzified result (classification): {'good' if result >= 0.5 else 'bad'}")
+classification = 'bad' if result < 1 else 'average' if result < 2.5 else 'good'
+print(f"Defuzzified result (classification): {classification}")
+
