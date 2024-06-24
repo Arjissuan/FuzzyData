@@ -48,16 +48,17 @@ class FuzzyMethods:
         self.BW[self.labels[2]] = fuzz.gaussmf(self.BW.universe, mean_BW_abnormal, std_BW_abnormal)
 
     def membership_fun_AP(self):
-        ape_norm = self.df.loc[self.df["Apgar"] >= 7, "Apgar"]
-        ape_abnm = self.df.loc[self.df['Apgar'] < 5, 'Apgar']
-        ape_sussy = self.df.loc[(self.df['Apgar'] < 7) & (self.df['Apgar'] >= 5), 'Apgar']
+        AP_normal = self.df.loc[self.df["Apgar"] >= 7, "Apgar"]
+        AP_abnormal = self.df.loc[self.df['Apgar'] < 5, 'Apgar']
+        AP_sussy = self.df.loc[(self.df['Apgar'] < 7) & (self.df['Apgar'] >= 5), 'Apgar']
 
-        mean_AP_normal = float(np.mean(ape_norm)) if not ape_norm.empty else 0
-        std_AP_normal = float(np.std(ape_norm)) if not ape_norm.empty else 1
-        mean_AP_sussy = float(np.mean(ape_sussy)) if not ape_sussy.empty else 0
-        std_AP_sussy = float(np.std(ape_sussy)) if not ape_sussy.empty else 1
-        mean_AP_abnormal = float(np.mean(ape_abnm)) if not ape_abnm.empty else 0
-        std_AP_abnormal = float(np.std(ape_abnm)) if not ape_abnm.empty else 1
+        mean_AP_normal = float(np.mean(AP_normal)) if not AP_normal.empty else 0
+        std_AP_normal = float(np.std(AP_normal)) if not AP_normal.empty else 1
+        mean_AP_sussy = float(np.mean(AP_sussy)) if not AP_sussy.empty else 0
+        std_AP_sussy = float(np.std(AP_sussy)) if not AP_sussy.empty else 1
+        mean_AP_abnormal = float(np.mean(AP_abnormal)) if not AP_abnormal.empty else 0
+        std_AP_abnormal = float(np.std(AP_abnormal)) if not AP_abnormal.empty else 1
+
 
         self.AP[self.labels[0]] = fuzz.gaussmf(self.AP.universe, mean_AP_normal, std_AP_normal)
         self.AP[self.labels[1]] = fuzz.gaussmf(self.AP.universe, mean_AP_sussy, std_AP_sussy)
@@ -110,8 +111,8 @@ class FuzzyMethods:
                                              rule9, rule10, rule11, rule12, rule13, rule14, rule15,
                                              rule16, rule17, rule18, rule19, rule20, rule21, rule22,
                                              rule23, rule24, rule25, rule26, rule27])
-        outcome_sim = ctrl.ControlSystemSimulation(outcome_control)
 
+        outcome_sim = ctrl.ControlSystemSimulation(outcome_control)
         outcome_sim.input['Percentile'] = input_data['Percentile']
         outcome_sim.input['Apgar'] = input_data['Apgar']
         outcome_sim.input['Ph'] = input_data['Ph']
