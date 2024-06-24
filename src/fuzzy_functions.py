@@ -52,6 +52,13 @@ class FuzzyMethods:
         ape_abnm = self.df.loc[self.df['Apgar'] < 5, 'Apgar']
         ape_sussy = self.df.loc[(self.df['Apgar'] < 7) & (self.df['Apgar'] >= 5), 'Apgar']
 
+        mean_AP_normal = float(np.mean(ape_norm)) if not ape_norm.empty else 0
+        std_AP_normal = float(np.std(ape_norm)) if not ape_norm.empty else 1
+        mean_AP_sussy = float(np.mean(ape_sussy)) if not ape_sussy.empty else 0
+        std_AP_sussy = float(np.std(ape_sussy)) if not ape_sussy.empty else 1
+        mean_AP_abnormal = float(np.mean(ape_abnm)) if not ape_abnm.empty else 0
+        std_AP_abnormal = float(np.std(ape_abnm)) if not ape_abnm.empty else 1
+
         self.AP[self.labels[0]] = fuzz.gaussmf(self.AP.universe, mean_AP_normal, std_AP_normal)
         self.AP[self.labels[1]] = fuzz.gaussmf(self.AP.universe, mean_AP_sussy, std_AP_sussy)
         self.AP[self.labels[2]] = fuzz.gaussmf(self.AP.universe, mean_AP_abnormal, std_AP_abnormal)
