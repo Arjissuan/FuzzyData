@@ -60,3 +60,58 @@ print(f"Fuzzy outcome: {result}")
 classification = 'bad' if result < 1 else 'average' if result < 2.5 else 'good'
 print(f"Defuzzified result (classification): {classification}")
 
+from sklearn.model_selection import cross_val_score, StratifiedKFold
+from sklearn.metrics import make_scorer, precision_recall_fscore_support
+from sklearn.base import BaseEstimator, ClassifierMixin
+import pandas as pd
+
+class FuzzyInferenceSystem(BaseEstimator, ClassifierMixin):
+    def __init__(self, p_i=0.0, delta=0.0):
+        self.p_i = p_i
+        self.delta = delta
+
+    def fit(self, X, y):
+        return self
+
+    def predict(self, X):
+        results = []
+        for sample in X:
+            percentile, apgar, ph = sample
+            outcome_sim.input['percentile'] = percentile
+            outcome_sim.input['apgar'] = apgar
+            outcome_sim.input['ph'] = ph
+            outcome_sim.compute()
+            result = outcome_sim.output['outcome']
+            results.append(1 if result >= 0.5 else 0)  # Classify as good (1) or bad (0)
+        return np.array(results)
+
+
+def g_measure(y_true, y_pred):
+    precision, recall, _, _ = precision_recall_fscore_support(y_true, y_pred, average='binary')
+    return 2 * (precision * recall) / (precision + recall)
+
+
+# Define the model and scoring function
+scorer = make_scorer(g_measure)
+param_range = np.arange(-0.50, 0.51, 0.25)
+best_g_measure = 0
+best_params = {'p(i)': None, 'Delta': None}
+
+# Convert dataset to numpy arrays
+data = pd.read_excel("../FDA_data.xls")
+X = data[['Percentile', 'Apgar', 'Ph']].values
+y = (data['Ph'] > 7.2).astype(int).values  # Binary outcome based on pH level
+
+# Grid search
+for p_i in param_range:
+    for delta in param_range:
+        model = FuzzyInferenceSystem(p_i=p_i, delta=delta)
+        cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
+        scores = cross_val_score(model, X, y, cv=cv, scoring=scorer)
+        mean_score = np.mean(scores)
+        if mean_score > best_g_measure:
+            best_g_measure = mean_score
+            best_params = {'p(i)': p_i, 'Delta': delta}
+
+print(f'Best parameters: {best_params}')
+print(f'Highest mean G-measure: {best_g_measure}')
