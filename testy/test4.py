@@ -3,10 +3,10 @@ import pandas as pd
 from sklearn.model_selection import KFold
 from sklearn.metrics import precision_score, recall_score
 import random
-from FuzzyData.src.fuzzy_functions import FuzzyMethods
+from src.fuzzy_functions import FuzzyMethods
 
 
-# Assuming FuzzyMethods and other imports are already defined
+
 def evaluate_fuzzy_system(fuzzy_system, input_data, pH_limits):
     fuzzy_score = fuzzy_system.train(input_data)
     binary_fuzzy_score = 1 if fuzzy_score < pH_limits['lower'] or fuzzy_score > pH_limits['upper'] else 0
@@ -21,7 +21,7 @@ def fitness_function(fuzzy_system, data, pH_limits, pi, delta):
     for train_index, test_index in kf.split(data):
         train_data = data.iloc[train_index]
         test_data = data.iloc[test_index]
-        fuzzy_system.train(train_data, pi, delta)
+        # fuzzy_system.train(train_data, pi, delta)
 
         binary_predictions = []
         actual_outcomes = []
@@ -108,6 +108,7 @@ if __name__ == "__main__":
     delta_range = (-0.50, 0.50)
     pH_limits = {'lower': 7.1, 'upper': 7.2}
     data = fzm.df
+    #22:00
 
     best_params, best_fitness = evolutionary_strategy(fzm, data, pH_limits, pi_range, delta_range)
     print(f"Best parameters: p(i) = {best_params[0]}, ∆ = {best_params[1]}")
