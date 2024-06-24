@@ -47,7 +47,7 @@ class FuzzyMethods:
         self.BW[self.labels[1]] = fuzz.gaussmf(self.BW.universe, mean_BW_sussy + pi, std_BW_sussy)
         self.BW[self.labels[2]] = fuzz.gaussmf(self.BW.universe, mean_BW_abnormal + pi, std_BW_abnormal)
 
-    def membership_fun_AP(self):
+    def membership_fun_AP(self, pi=0):
         ape_norm = self.df.loc[self.df["Apgar"] >= 7, "Apgar"]
         ape_abnm = self.df.loc[self.df['Apgar'] < 5, 'Apgar']
         ape_sussy = self.df.loc[(self.df['Apgar'] < 7) & (self.df['Apgar'] >= 5), 'Apgar']
@@ -110,11 +110,42 @@ class FuzzyMethods:
                                              rule16, rule17, rule18, rule19, rule20, rule21, rule22,
                                              rule23, rule24, rule25, rule26, rule27])
         outcome_sim = ctrl.ControlSystemSimulation(outcome_control)
+        return outcome_sim
 
-        outcome_sim.input['Percentile'] = input_data['Percentile']
-        outcome_sim.input['Apgar'] = input_data['Apgar']
-        outcome_sim.input['Ph'] = input_data['Ph']
-        outcome_sim.compute()
 
-        return outcome_sim.output['outcome']
+    def train(self, train_data, pi=0, delta=0):
+        # Adjust membership functions with pi
+        self.membership_fun_ph(pi)
+        self.membership_fun_BW(pi)
+        self.membership_fun_AP(pi)
+
+        # Adjust outcome membership functions with delta
+        self.outcome[self.labels[2]] = fuzz.trapmf(self.outcome.universe,
+                                                   [0 + delta, 0 + delta, 0.5 + delta, 1 + delta])
+        self.outcome[self.labels[1]] = fuzz.trapmf(self.outcome.universe,
+                                                   [1 + delta, 1 + delta, 1.5 + delta, 2 + delta])
+        self.outcome[self.labels[0]] = fuzz.trapmf(self.outcome.universe,
+                                                   [2 + delta, 2 + delta, 2.5 + delta, 3 + delta])
+
+        # Define rules
+        outcome_sim = self.rules()
+
+        outcomes = []
+
+        if type(train_data) != dict:
+
+            for i in range(len(train_data)):
+                outcome_sim.input['Percentile'] = train_data.iloc[i, 0]
+                outcome_sim.input['Apgar'] = train_data.iloc[i, 1]
+                outcome_sim.input['Ph'] = train_data.iloc[i, 2]
+                outcome_sim.compute()
+                outcomes.append(outcome_sim.output['outcome'])
+            return outcomes
+
+        else:
+            outcome_sim.input['Percentile'] = train_data['Percentile']
+            outcome_sim.input['Apgar'] = train_data['Apgar']
+            outcome_sim.input['Ph'] = train_data['Ph']
+            outcome_sim.compute()
+            return outcome_sim.output['outcome']
 
