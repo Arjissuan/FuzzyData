@@ -1,7 +1,7 @@
-from src.fuzzy_functions import FuzzyMethods
 import numpy as np
 from sklearn.model_selection import KFold
 from sklearn.metrics import precision_score, recall_score
+from fuzzy_functions import FuzzyMethods
 
 
 def evaluate_fuzzy_system(fuzzy_system, input_data, pH_limits):
@@ -53,21 +53,19 @@ def grid_search_fuzzy(fuzzy_system, data, pH_limits):
 
     return best_params, best_g_measure
 
+# Define the range of p(i) and ∆
+pi_range = np.arange(-0.50, 0.51, 0.25)
+delta_range = np.arange(-0.50, 0.51, 0.25)
+parameter_grid = [(pi, delta) for pi in pi_range for delta in delta_range]
 
-if __name__ == "__main__":
-    fzm = FuzzyMethods()
-    fzm.membership_fun_ph()
-    fzm.membership_fun_AP()
-    fzm.membership_fun_BW()
-    fzm.make_plots()
+fuzzy_system = FuzzyMethods()
+fuzzy_system.membership_fun_ph()
+fuzzy_system.membership_fun_BW()
+fuzzy_system.membership_fun_AP()
 
-    pi_range = np.arange(-0.50, 0.51, 0.25)
-    delta_range = np.arange(-0.50, 0.51, 0.25)
-    parameter_grid = [(pi, delta) for pi in pi_range for delta in delta_range]
+pH_limits = {'lower': 7.1, 'upper': 7.2}  # These limits should be provided by your teacher
+data = fuzzy_system.df  # Assuming this is the dataset
 
-    pH_limits = {'lower': 7.1, 'upper': 7.2}  # These limits should be provided by your teacher
-    data = fzm.df  # Assuming this is the dataset
-
-    best_params, best_g_measure = grid_search_fuzzy(fzm, data, pH_limits)
-    print(f"Best parameters: p(i) = {best_params[0]}, ∆ = {best_params[1]}")
-    print(f"Best mean G-measure: {best_g_measure}")
+best_params, best_g_measure = grid_search_fuzzy(fuzzy_system, data, pH_limits)
+print(f"Best parameters: p(i) = {best_params[0]}, ∆ = {best_params[1]}")
+print(f"Best mean G-measure: {best_g_measure}")
