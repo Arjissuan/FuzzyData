@@ -2,7 +2,7 @@ from sklearn.model_selection import GridSearchCV, KFold
 from sklearn.metrics import make_scorer
 from sklearn.base import BaseEstimator, ClassifierMixin
 import numpy as np
-from FuzzyData.src.fuzzy_functions import FuzzyMethods
+from src.fuzzy_functions import FuzzyMethods
 
 
 # Define the custom scoring function for the G-measure
@@ -34,7 +34,7 @@ class FuzzyGridSearch(BaseEstimator, ClassifierMixin):
         return self
 
     def predict(self, X):
-        return np.array(self.fuzzy_methods.train(X, self.pi, self.delta))
+        return np.array(self.fuzzy_methods.fuzzy_interfence_system(X, self.pi, self.delta))
 
     def set_params(self, **params):
         for param, value in params.items():

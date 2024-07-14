@@ -1,57 +1,46 @@
-from src.fuzzy_functions import FuzzyMethods
+import pandas as pd
 import numpy as np
-from sklearn.model_selection import KFold
-from sklearn.metrics import precision_score, recall_score
+from src.fuzzy_functions import FuzzyMethods
+from sklearn.base import BaseEstimator, ClassifierMixin
+from sklearn.metrics import make_scorer
+from sklearn.model_selection import GridSearchCV, KFold
 
+def g_measure(y_true, y_pred):
+    # Calculate G-measure (harmonic mean of precision and recall)
+    tp = np.sum((y_true == 1) & (y_pred == 1))
+    precision = tp / np.sum(y_pred == 1) if np.sum(y_pred == 1) > 0 else 0
+    recall = tp / np.sum(y_true == 1) if np.sum(y_true == 1) > 0 else 0
+    if precision + recall == 0:
+        return 0
+    g_measure = (2 * precision * recall) / (precision + recall)
+    return g_measure
 
-def evaluate_fuzzy_system(fuzzy_system, input_data, pH_limits):
-    # Perform fuzzy inference
-    fuzzy_score = fuzzy_system.train(input_data)
+class FuzzyGridSearch(BaseEstimator, ClassifierMixin):
+    def __init__(self, fuzzy_methods_instance, ph_limits, pi=0, delta=0):
+        self.fuzzy_methods = fuzzy_methods_instance
+        self.ph_limits = ph_limits
+        self.pi = pi
+        self.delta = delta
+        self.classes_ = np.array([0, 1])  # Assuming binary classification
 
-    # Convert fuzzy_score to binary outcome based on pH limits
-    binary_fuzzy_score = 1 if fuzzy_score < pH_limits['lower'] or fuzzy_score > pH_limits['upper'] else 0
-    actual_outcome = 1 if input_data['Ph'] < pH_limits['lower'] or input_data['Ph'] > pH_limits['upper'] else 0
+    def fit(self, X, y=None):
+        # This method does nothing but is required by the sklearn API
+        self.classes_ = np.unique(y)
+        return self
 
-    return binary_fuzzy_score, actual_outcome
+    def predict(self, X):
+        return np.array(self.fuzzy_methods.fuzzy_interfence_system(X, self.pi, self.delta))
 
+    def set_params(self, **params):
+        for param, value in params.items():
+            setattr(self, param, value)
+        return self
 
-def grid_search_fuzzy(fuzzy_system, data, pH_limits):
-    kf = KFold(n_splits=5, shuffle=True, random_state=42)
-    best_g_measure = 0
-    best_params = None
-
-    for (pi, delta) in parameter_grid:
-        g_measures = []
-
-        for train_index, test_index in kf.split(data):
-            train_data = data.iloc[train_index]
-            test_data = data.iloc[test_index]
-
-            # Train fuzzy system with the current parameters pi and delta
-            fuzzy_system.train(train_data, pi, delta)  # You need to implement this method
-
-            # Evaluate on test set
-            binary_predictions = []
-            actual_outcomes = []
-
-            for idx, row in test_data.iterrows():
-                input_data = {'Percentile': row['Percentile'], 'Apgar': row['Apgar'], 'Ph': row['Ph']}
-                binary_fuzzy_score, actual_outcome = evaluate_fuzzy_system(fuzzy_system, input_data, pH_limits)
-                binary_predictions.append(binary_fuzzy_score)
-                actual_outcomes.append(actual_outcome)
-
-            # Calculate precision, recall, and G-measure
-            precision = precision_score(actual_outcomes, binary_predictions)
-            recall = recall_score(actual_outcomes, binary_predictions)
-            g_measure = (2 * precision * recall) / (precision + recall) if (precision + recall) > 0 else 0
-            g_measures.append(g_measure)
-
-        mean_g_measure = np.mean(g_measures)
-        if mean_g_measure > best_g_measure:
-            best_g_measure = mean_g_measure
-            best_params = (pi, delta)
-
-    return best_params, best_g_measure
+    def get_params(self, deep=False):
+        return {'fuzzy_methods_instance': self.fuzzy_methods,
+                'ph_limits': self.ph_limits,
+                'pi': self.pi,
+                'delta': self.delta}
 
 
 if __name__ == "__main__":
@@ -60,14 +49,26 @@ if __name__ == "__main__":
     fzm.membership_fun_AP()
     fzm.membership_fun_BW()
     fzm.make_plots()
+    example_data = {
+        'Percentile': [10, 3],
+        'Apgar': [6, 2],
+        'Ph': [7.15, 3]
+    }
+    print(fzm.fuzzy_interfence_system(pd.DataFrame(example_data), 0, 1))
+    g_scorer = make_scorer(g_measure)
+    ph_limits = {'normal': 7.2, 'abnormal': 7.1}
+    # Prepare the training data
+    X = fzm.df[['Percentile', 'Apgar', 'Ph']]
+    y = (fzm.df['Ph'] < ph_limits['abnormal']).astype(int)
+    # Instantiate the grid search object using the custom FuzzyGridSearch class
+    param_grid = {'pi': np.arange(-0.5, 0.6, 0.25), 'delta': np.arange(-0.5, 0.6, 0.25)}
+    grid_search = GridSearchCV(estimator=FuzzyGridSearch(fuzzy_methods_instance=fzm, ph_limits=ph_limits),
+                               param_grid=param_grid, scoring=g_scorer, cv=KFold(n_splits=5))
+    # Perform grid search with 5-fold cross-validation
+    grid_search.fit(X, y)
+    # Display the best parameters and corresponding mean G-measure
+    best_params = grid_search.best_params_
+    best_score = grid_search.best_score_
+    print(f"Best Parameters: {best_params}")
+    print(f"Mean G-measure: {best_score:.4f}")
 
-    pi_range = np.arange(-0.50, 0.51, 0.25)
-    delta_range = np.arange(-0.50, 0.51, 0.25)
-    parameter_grid = [(pi, delta) for pi in pi_range for delta in delta_range]
-
-    pH_limits = {'lower': 7.1, 'upper': 7.2}  # These limits should be provided by your teacher
-    data = fzm.df  # Assuming this is the dataset
-
-    best_params, best_g_measure = grid_search_fuzzy(fzm, data, pH_limits)
-    print(f"Best parameters: p(i) = {best_params[0]}, ∆ = {best_params[1]}")
-    print(f"Best mean G-measure: {best_g_measure}")

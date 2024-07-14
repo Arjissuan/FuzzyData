@@ -5,15 +5,17 @@ import os
 import matplotlib.pyplot as plt
 from skfuzzy import control as ctrl
 
+np.seterr(divide='ignore', invalid='ignore') #have no idea what is 'machine zero' for now it has to be efficient
 
 class FuzzyMethods:
     def __init__(self, file_name="FDA_data.xls"):
-        self.df = pd.read_excel(io=os.path.join(os.getcwd(), file_name))
+        self.df = pd.read_excel(io=os.path.join(os.getcwd(), file_name)) #input data
         self.BW = ctrl.Antecedent(np.linspace(np.min(self.df.iloc[:, 0]), np.max(self.df.iloc[:, 0]), 1000), label="Percentile")
         self.AP = ctrl.Antecedent(np.linspace(np.min(self.df.iloc[:, 1]), np.max(self.df.iloc[:, 1]), 1000), label="Apgar")
         self.ph = ctrl.Antecedent(np.linspace(np.min(self.df.iloc[:, 2]), np.max(self.df.iloc[:, 2]), 1000), label="Ph")
-        self.outcome = ctrl.Consequent(np.arange(0, 3.01, 0.01), 'outcome')
+        self.outcome = ctrl.Consequent(np.arange(0, 3.01, 0.01), label='outcome')
         self.labels = ("Normal", "Suspicious", "Abnormal")
+
 
     def membership_fun_ph(self, pi=0):
         peha_norm = self.df.loc[self.df["Ph"] >= 7.2, "Ph"]
@@ -42,7 +44,7 @@ class FuzzyMethods:
         std_BW_sussy = float(np.std(bewu_sussy)) if not bewu_sussy.empty else 1e-6
         mean_BW_abnormal = float(np.mean(bewu_abnm)) if not bewu_abnm.empty else 0
         std_BW_abnormal = float(np.std(bewu_abnm) + 1e-6) if not bewu_abnm.empty else 1e-6
-
+        # print(mean_BW_abnormal)
         self.BW[self.labels[0]] = fuzz.gaussmf(self.BW.universe, mean_BW_normal + pi, std_BW_normal)
         self.BW[self.labels[1]] = fuzz.gaussmf(self.BW.universe, mean_BW_sussy + pi, std_BW_sussy)
         self.BW[self.labels[2]] = fuzz.gaussmf(self.BW.universe, mean_BW_abnormal + pi, std_BW_abnormal)
@@ -71,6 +73,7 @@ class FuzzyMethods:
         plt.show()
 
     def rules(self):
+        #outcome membership functions
         self.outcome[self.labels[2]] = fuzz.trapmf(self.outcome.universe, [0, 0, 0.5, 1])
         self.outcome[self.labels[1]] = fuzz.trapmf(self.outcome.universe, [1, 1, 1.5, 2])
         self.outcome[self.labels[0]] = fuzz.trapmf(self.outcome.universe, [2, 2, 2.5, 3])
@@ -113,12 +116,11 @@ class FuzzyMethods:
 
         return rules
 
-    def train(self, input_data, pi=0, delta=0):
+    def fuzzy_interfence_system(self, input_data, pi=0, delta=0): #delta equal 1 will give true results and pi equal 0
         self.membership_fun_ph(pi)
         self.membership_fun_AP(pi)
         self.membership_fun_BW(pi)
-        rules = self.rules()
-        control = ctrl.ControlSystem(rules)
+        control = ctrl.ControlSystem(self.rules())
         sim = ctrl.ControlSystemSimulation(control)
         output_data = np.zeros(input_data.shape[0])
 
@@ -136,5 +138,5 @@ class FuzzyMethods:
             "Suspicious": 1 + delta,
             "Abnormal": 0 + delta
         }
-        predictions = np.digitize(output_data, bins=[thresholds["Abnormal"], thresholds["Suspicious"], thresholds["Normal"]])
-        return predictions
+        predictions = np.digitize(output_data, bins=[thresholds["Abnormal"], thresholds["Suspicious"], thresholds["Normal"]], right=True)
+        return predictions #, output_data
