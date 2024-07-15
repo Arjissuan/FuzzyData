@@ -7,6 +7,7 @@ from skfuzzy import control as ctrl
 
 np.seterr(divide='ignore', invalid='ignore') #have no idea what is 'machine zero' for now it has to be efficient
 
+
 class FuzzyMethods:
     def __init__(self, file_name="FDA_data.xls"):
         self.df = pd.read_excel(io=os.path.join(os.getcwd(), file_name)) #input data

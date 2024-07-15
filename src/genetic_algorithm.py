@@ -1,7 +1,8 @@
+import random
 import math
+import copy
 import numpy as np
-from FuzzyData.src.fuzzy_functions import FuzzyMethods
-
+from sklearn.model_selection import KFold
 
 def g_measure(y_true, y_pred):
     tp = np.sum((y_true == 1) & (y_pred == 1))
@@ -12,26 +13,26 @@ def g_measure(y_true, y_pred):
     g_measure = (2 * precision * recall) / (precision + recall)
     return g_measure
 
-
 class FuzzyGA:
-    def __init__(self, fuzzy_system, parents_population_size=250, parents_selected_percentage=0.8,
-                 mutation_probability=0.2, number_of_generations=1000):
-        self.fuzzy_system = fuzzy_system
+    def __init__(self, data, parents_population_size=250, parents_selected_percentage=0.8,
+                 mutation_probability=0.2, number_of_generations=1000, visualise=True):
+        self.data = data
         self.parents_population_size = parents_population_size
         self.parents_selected_percentage = parents_selected_percentage
         self.mutation_probability = mutation_probability
         self.number_of_generations = number_of_generations
+        self.visualise = visualise
 
         self.parents_to_select = math.ceil(self.parents_population_size * self.parents_selected_percentage)
         self.offspring_to_mutate = math.ceil(self.parents_to_select * self.mutation_probability)
 
-        # Initialize parent parameters with random values: [pi, delta]
-        self.parents = np.random.uniform(low=-1, high=1, size=(self.parents_population_size, 2))
+        self.parents = np.zeros((self.parents_population_size, len(data[0])))  # Initializing for parameters
         self.parents_fitness_array = np.zeros(self.parents_population_size)
 
-        self.offspring = np.zeros((self.parents_to_select, 2))
+        self.offspring = np.zeros((self.parents_to_select, len(data[0])))
         self.offspring_fitness_array = np.zeros(self.parents_to_select)
 
+        self.parents_creation()
         self.evaluate_initial_population()
 
     def evaluate_initial_population(self):
@@ -66,28 +67,28 @@ class FuzzyGA:
 
         return best_g_measure, best_params
 
-    def evaluate(self, params):
-        pi, delta = params
-        self.fuzzy_system.membership_fun_ph(pi)
-        self.fuzzy_system.membership_fun_AP(pi)
-        self.fuzzy_system.membership_fun_BW(pi)
+    def parents_creation(self):
+        self.parents = np.random.uniform(low=0, high=1, size=(self.parents_population_size, len(self.data[0])))
 
-        input_data = self.fuzzy_system.df[['Percentile', 'Apgar', 'Ph']]  # Assuming input data is stored in FuzzyMethods instance
-        y_true = self.fuzzy_system.df[['Ph']].values  # Assuming output data is stored in FuzzyMethods instance
-        y_pred = self.fuzzy_system.fuzzy_interfence_system(input_data, pi=pi, delta=delta)
+    def evaluate(self, params):
+        y_true = self.data[:, 0]
+        y_pred = self.fuzzy_system(params)
         return g_measure(y_true, y_pred)
 
-
+    def fuzzy_system(self, params):
+        # Placeholder for fuzzy system, generate random binary array as predictions
+        y_pred = np.random.randint(0, 2, len(self.data))
+        return y_pred
 
     def parents_selection(self):
         selected_indexes = np.random.choice(np.arange(self.parents.shape[0]), size=self.parents_to_select, replace=False)
         return self.parents[selected_indexes]
 
     def offspring_creation(self, selected_parents):
-        offspring_creation_array = np.zeros((self.parents_to_select, 2))
+        offspring_creation_array = np.zeros((self.parents_to_select, len(self.data[0])))
         for i in range(0, self.parents_to_select, 2):
             parent1, parent2 = selected_parents[i], selected_parents[i + 1]
-            crossover_point = np.random.randint(1, 2)
+            crossover_point = np.random.randint(1, len(self.data[0]) - 1)
             offspring1 = np.concatenate([parent1[:crossover_point], parent2[crossover_point:]])
             offspring2 = np.concatenate([parent2[:crossover_point], parent1[crossover_point:]])
             offspring_creation_array[i] = offspring1
@@ -97,17 +98,21 @@ class FuzzyGA:
     def mutations_application(self):
         selected_indexes = np.random.choice(np.arange(self.offspring.shape[0]), size=self.offspring_to_mutate, replace=False)
         for index in selected_indexes:
-            mutation_point = np.random.randint(0, 2)
-            self.offspring[index, mutation_point] = np.random.uniform(-1, 1)
+            mutation_point = np.random.randint(0, len(self.data[0]))
+            self.offspring[index, mutation_point] = np.random.uniform(0, 1)
 
+def cross_validate(data, params, n_splits=5):
+    kf = KFold(n_splits=n_splits, shuffle=True)
+    g_measures = []
 
-# Example usage
-file_name = "FDA_data.xls"
-fuzzy_system = FuzzyMethods(file_name)
+    for train_index, test_index in kf.split(data):
+        train_data, test_data = data[train_index], data[test_index]
+        ga = FuzzyGA(train_data, *params)
+        g_measure, best_params = ga.main_loop()
+        g_measures.append(g_measure)
 
-ga = FuzzyGA(fuzzy_system)
-best_g_measure, best_params = ga.main_loop()
+    mean_g_measure = np.mean(g_measures)
+    best_fold = np.argmax(g_measures)
+    best_fold_params = params[best_fold]
 
-print(f"Best G-measure found: {best_g_measure}")
-print(f"Best parameters (pi, delta): {best_params}")
-
+    return mean_g_measure, best_fold_params
