@@ -70,5 +70,5 @@ if __name__ == "__main__":
     best_params = grid_search.best_params_
     best_score = grid_search.best_score_
     print(f"Best Parameters: {best_params}")
-    print(f"Mean G-measure: {best_score:.4f}")
+    print(f"Best G-measure: {best_score:.4f}")
 
