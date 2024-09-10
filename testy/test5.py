@@ -1,14 +1,18 @@
 #zadanie 1
 import numpy as np
 import pandas as pd
+import glob
 
-file_path = 'FDA_data.csv'
-data = pd.read_csv(file_path)
+file_path = glob.glob('/home/arjissuan/PycharmProjects/FuzzyData/FDA_data*')[0]
+print(file_path)
+try:
+    data = pd.read_csv(file_path)
+except:
+    data = pd.read_excel(file_path)
 
 
 def sigmoid(x, a, b):
     return 1 / (1 + np.exp(-a * (x - b)))
-
 
 #membership functions
 def apgar_membership(apgar):
@@ -48,6 +52,7 @@ for indx, row in data.iterrows():
         'Ph_Abnormal': ph_mem[2]
     })
 
-# Convert to DataFrame for better readability
+
 memberships_df = pd.DataFrame(memberships)
 print(memberships_df.head())
+
