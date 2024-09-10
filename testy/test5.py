@@ -2,8 +2,10 @@
 import numpy as np
 import pandas as pd
 import glob
+import os
 
-file_path = glob.glob('/home/arjissuan/PycharmProjects/FuzzyData/FDA_data*')[0]
+print()
+file_path = glob.glob(f'{os.getcwd()}/FDA_data*')[0]
 print(file_path)
 try:
     data = pd.read_csv(file_path)
