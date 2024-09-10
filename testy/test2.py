@@ -39,9 +39,9 @@ outcome_sim = ctrl.ControlSystemSimulation(outcome_ctrl)
 
 # Example input
 example_data = {
-    'percentile': 10,
-    'apgar': 8,
-    'ph': 7.0
+    'percentile': 3,
+    'apgar': 5,
+    'ph': 8
 }
 
 # Fuzzification

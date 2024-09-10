@@ -1,6 +1,7 @@
+from FuzzyData.src.fuzzy_functions import FuzzyMethods
 import math
 import numpy as np
-from FuzzyData.src.fuzzy_functions import FuzzyMethods
+
 from joblib import Parallel, delayed
 from sklearn.metrics import f1_score
 from sklearn.model_selection import KFold

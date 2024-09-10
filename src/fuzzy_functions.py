@@ -79,41 +79,66 @@ class FuzzyMethods:
         self.outcome[self.labels[1]] = fuzz.trapmf(self.outcome.universe, [1, 1, 1.5, 2])
         self.outcome[self.labels[0]] = fuzz.trapmf(self.outcome.universe, [2, 2, 2.5, 3])
 
-        rule1 = ctrl.Rule(self.AP[self.labels[2]] & self.BW[self.labels[2]] & self.ph[self.labels[2]], self.outcome[self.labels[2]])
-        rule2 = ctrl.Rule(self.AP[self.labels[2]] & self.BW[self.labels[2]] & self.ph[self.labels[0]], self.outcome[self.labels[2]])
-        rule3 = ctrl.Rule(self.AP[self.labels[2]] & self.BW[self.labels[2]] & self.ph[self.labels[1]], self.outcome[self.labels[2]])
-        rule4 = ctrl.Rule(self.AP[self.labels[2]] & self.BW[self.labels[0]] & self.ph[self.labels[2]], self.outcome[self.labels[2]])
-        rule5 = ctrl.Rule(self.AP[self.labels[2]] & self.BW[self.labels[0]] & self.ph[self.labels[0]], self.outcome[self.labels[2]])
-        rule6 = ctrl.Rule(self.AP[self.labels[2]] & self.BW[self.labels[0]] & self.ph[self.labels[1]], self.outcome[self.labels[2]])
-        rule7 = ctrl.Rule(self.AP[self.labels[2]] & self.BW[self.labels[1]] & self.ph[self.labels[2]], self.outcome[self.labels[2]])
-        rule8 = ctrl.Rule(self.AP[self.labels[2]] & self.BW[self.labels[1]] & self.ph[self.labels[0]], self.outcome[self.labels[2]])
-        rule9 = ctrl.Rule(self.AP[self.labels[2]] & self.BW[self.labels[1]] & self.ph[self.labels[1]], self.outcome[self.labels[2]])
-        rule10 = ctrl.Rule(self.AP[self.labels[0]] & self.BW[self.labels[2]] & self.ph[self.labels[2]], self.outcome[self.labels[2]])
-        rule11 = ctrl.Rule(self.AP[self.labels[0]] & self.BW[self.labels[2]] & self.ph[self.labels[0]], self.outcome[self.labels[2]])
-        rule12 = ctrl.Rule(self.AP[self.labels[0]] & self.BW[self.labels[2]] & self.ph[self.labels[1]], self.outcome[self.labels[2]])
-        rule13 = ctrl.Rule(self.AP[self.labels[0]] & self.BW[self.labels[0]] & self.ph[self.labels[2]], self.outcome[self.labels[1]])
-        rule14 = ctrl.Rule(self.AP[self.labels[0]] & self.BW[self.labels[0]] & self.ph[self.labels[0]], self.outcome[self.labels[1]])
-        rule15 = ctrl.Rule(self.AP[self.labels[0]] & self.BW[self.labels[0]] & self.ph[self.labels[1]], self.outcome[self.labels[1]])
-        rule16 = ctrl.Rule(self.AP[self.labels[0]] & self.BW[self.labels[1]] & self.ph[self.labels[2]], self.outcome[self.labels[2]])
-        rule17 = ctrl.Rule(self.AP[self.labels[0]] & self.BW[self.labels[1]] & self.ph[self.labels[0]], self.outcome[self.labels[1]])
-        rule18 = ctrl.Rule(self.AP[self.labels[0]] & self.BW[self.labels[1]] & self.ph[self.labels[1]], self.outcome[self.labels[1]])
-        rule19 = ctrl.Rule(self.AP[self.labels[1]] & self.BW[self.labels[2]] & self.ph[self.labels[2]], self.outcome[self.labels[2]])
-        rule20 = ctrl.Rule(self.AP[self.labels[1]] & self.BW[self.labels[2]] & self.ph[self.labels[0]], self.outcome[self.labels[2]])
-        rule21 = ctrl.Rule(self.AP[self.labels[1]] & self.BW[self.labels[2]] & self.ph[self.labels[1]], self.outcome[self.labels[2]])
-        rule22 = ctrl.Rule(self.AP[self.labels[1]] & self.BW[self.labels[0]] & self.ph[self.labels[2]], self.outcome[self.labels[1]])
-        rule23 = ctrl.Rule(self.AP[self.labels[1]] & self.BW[self.labels[0]] & self.ph[self.labels[0]], self.outcome[self.labels[1]])
-        rule24 = ctrl.Rule(self.AP[self.labels[1]] & self.BW[self.labels[0]] & self.ph[self.labels[1]], self.outcome[self.labels[1]])
-        rule25 = ctrl.Rule(self.AP[self.labels[1]] & self.BW[self.labels[1]] & self.ph[self.labels[2]], self.outcome[self.labels[2]])
-        rule26 = ctrl.Rule(self.AP[self.labels[1]] & self.BW[self.labels[1]] & self.ph[self.labels[0]], self.outcome[self.labels[1]])
-        rule27 = ctrl.Rule(self.AP[self.labels[1]] & self.BW[self.labels[1]] & self.ph[self.labels[1]], self.outcome[self.labels[1]])
-        rule28 = ctrl.Rule(self.AP[self.labels[1]] & self.BW[self.labels[0]] & self.ph[self.labels[0]], self.outcome[self.labels[1]])
-        rule29 = ctrl.Rule(self.AP[self.labels[0]] & self.BW[self.labels[1]] & self.ph[self.labels[0]], self.outcome[self.labels[1]])
-        rule30 = ctrl.Rule(self.AP[self.labels[1]] & self.BW[self.labels[0]] & self.ph[self.labels[2]], self.outcome[self.labels[1]])
+        rule1 = ctrl.Rule(self.AP[self.labels[2]] & self.BW[self.labels[2]] & self.ph[self.labels[2]],
+                          self.outcome[self.labels[2]])
+        rule2 = ctrl.Rule(self.AP[self.labels[2]] & self.BW[self.labels[2]] & self.ph[self.labels[0]],
+                          self.outcome[self.labels[2]])
+        rule3 = ctrl.Rule(self.AP[self.labels[2]] & self.BW[self.labels[2]] & self.ph[self.labels[1]],
+                          self.outcome[self.labels[2]])
+        rule4 = ctrl.Rule(self.AP[self.labels[2]] & self.BW[self.labels[0]] & self.ph[self.labels[2]],
+                          self.outcome[self.labels[2]])
+        rule5 = ctrl.Rule(self.AP[self.labels[2]] & self.BW[self.labels[0]] & self.ph[self.labels[0]],
+                          self.outcome[self.labels[2]])
+        rule6 = ctrl.Rule(self.AP[self.labels[2]] & self.BW[self.labels[0]] & self.ph[self.labels[1]],
+                          self.outcome[self.labels[2]])
+        rule7 = ctrl.Rule(self.AP[self.labels[2]] & self.BW[self.labels[1]] & self.ph[self.labels[2]],
+                          self.outcome[self.labels[2]])
+        rule8 = ctrl.Rule(self.AP[self.labels[2]] & self.BW[self.labels[1]] & self.ph[self.labels[0]],
+                          self.outcome[self.labels[2]])
+        rule9 = ctrl.Rule(self.AP[self.labels[2]] & self.BW[self.labels[1]] & self.ph[self.labels[1]],
+                          self.outcome[self.labels[2]])
+
+        rule10 = ctrl.Rule(self.AP[self.labels[0]] & self.BW[self.labels[2]] & self.ph[self.labels[2]],
+                           self.outcome[self.labels[2]])
+        rule11 = ctrl.Rule(self.AP[self.labels[0]] & self.BW[self.labels[2]] & self.ph[self.labels[0]],
+                           self.outcome[self.labels[2]])
+        rule12 = ctrl.Rule(self.AP[self.labels[0]] & self.BW[self.labels[2]] & self.ph[self.labels[1]],
+                           self.outcome[self.labels[2]])
+        rule13 = ctrl.Rule(self.AP[self.labels[0]] & self.BW[self.labels[0]] & self.ph[self.labels[2]],
+                           self.outcome[self.labels[2]])
+        rule14 = ctrl.Rule(self.AP[self.labels[0]] & self.BW[self.labels[0]] & self.ph[self.labels[0]],
+                           self.outcome[self.labels[0]])
+        rule15 = ctrl.Rule(self.AP[self.labels[0]] & self.BW[self.labels[0]] & self.ph[self.labels[1]],
+                           self.outcome[self.labels[0]])
+        rule16 = ctrl.Rule(self.AP[self.labels[0]] & self.BW[self.labels[1]] & self.ph[self.labels[2]],
+                           self.outcome[self.labels[2]])
+        rule17 = ctrl.Rule(self.AP[self.labels[0]] & self.BW[self.labels[1]] & self.ph[self.labels[0]],
+                           self.outcome[self.labels[0]])
+        rule18 = ctrl.Rule(self.AP[self.labels[0]] & self.BW[self.labels[1]] & self.ph[self.labels[1]],
+                           self.outcome[self.labels[1]])
+
+        rule19 = ctrl.Rule(self.AP[self.labels[1]] & self.BW[self.labels[2]] & self.ph[self.labels[2]],
+                           self.outcome[self.labels[2]])
+        rule20 = ctrl.Rule(self.AP[self.labels[1]] & self.BW[self.labels[2]] & self.ph[self.labels[0]],
+                           self.outcome[self.labels[2]])
+        rule21 = ctrl.Rule(self.AP[self.labels[1]] & self.BW[self.labels[2]] & self.ph[self.labels[1]],
+                           self.outcome[self.labels[2]])
+        rule22 = ctrl.Rule(self.AP[self.labels[1]] & self.BW[self.labels[0]] & self.ph[self.labels[2]],
+                           self.outcome[self.labels[2]])
+        rule23 = ctrl.Rule(self.AP[self.labels[1]] & self.BW[self.labels[0]] & self.ph[self.labels[0]],
+                           self.outcome[self.labels[0]])
+        rule24 = ctrl.Rule(self.AP[self.labels[1]] & self.BW[self.labels[0]] & self.ph[self.labels[1]],
+                           self.outcome[self.labels[0]])
+        rule25 = ctrl.Rule(self.AP[self.labels[1]] & self.BW[self.labels[1]] & self.ph[self.labels[2]],
+                           self.outcome[self.labels[2]])
+        rule26 = ctrl.Rule(self.AP[self.labels[1]] & self.BW[self.labels[1]] & self.ph[self.labels[0]],
+                           self.outcome[self.labels[1]])
+        rule27 = ctrl.Rule(self.AP[self.labels[1]] & self.BW[self.labels[1]] & self.ph[self.labels[1]],
+                           self.outcome[self.labels[1]])
 
         rules = [rule1, rule2, rule3, rule4, rule5, rule6, rule7, rule8, rule9,
                  rule10, rule11, rule12, rule13, rule14, rule15, rule16, rule17, rule18,
-                 rule19, rule20, rule21, rule22, rule23, rule24, rule25, rule26, rule27,
-                 rule28, rule29, rule30]
+                 rule19, rule20, rule21, rule22, rule23, rule24, rule25, rule26, rule27]
 
         return rules
 
@@ -126,10 +151,11 @@ class FuzzyMethods:
         output_data = np.zeros(input_data.shape[0])
 
         for i in range(input_data.shape[0]):
+            #fuzzification
             sim.input['Percentile'] = input_data.iloc[i, 0]
             sim.input['Apgar'] = input_data.iloc[i, 1]
             sim.input['Ph'] = input_data.iloc[i, 2]
-
+            #defuzification
             sim.compute()
             output_data[i] = sim.output['outcome']
 
@@ -140,4 +166,4 @@ class FuzzyMethods:
             "Abnormal": 0 + delta
         }
         predictions = np.digitize(output_data, bins=[thresholds["Abnormal"], thresholds["Suspicious"], thresholds["Normal"]], right=True)
-        return predictions #, output_data
+        return predictions
