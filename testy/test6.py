@@ -37,18 +37,19 @@ def create_crossing_suspicious(universe, c_normal, c_abnormal, steepness_normal,
 
     return normal_sigmoid, suspicious_sigmoid, abnormal_sigmoid
 
-# Generate universe of discourse for each variable
-bw_universe = np.linspace(min(bw_values), max(bw_values), 100)
-ap_universe = np.linspace(min(ap_values), max(ap_values), 100)
-ph_universe = np.linspace(min(ph_values), max(ph_values), 100)
+# Extend the universe of discourse slightly beyond the min and max values for each variable
+bw_universe = np.linspace(min(bw_values) - 2, max(bw_values) + 2, 100)
+ap_universe = np.linspace(min(ap_values) - 2, max(ap_values) + 2, 100)
+ph_universe = np.linspace(min(ph_values) - 0.1, max(ph_values) + 0.1, 100)
 
-# Create sigmoids for each variable ensuring proper crossing of suspicious at 0.5 points
+# Generate the sigmoids again with the extended universe
 BW_normal, BW_suspicious, BW_abnormal = create_crossing_suspicious(bw_universe, c_normal=10, c_abnormal=5,
                                                                    steepness_normal=2, steepness_abnormal=2)
 AP_normal, AP_suspicious, AP_abnormal = create_crossing_suspicious(ap_universe, c_normal=7, c_abnormal=5,
                                                                    steepness_normal=2, steepness_abnormal=2)
 PH_normal, PH_suspicious, PH_abnormal = create_crossing_suspicious(ph_universe, c_normal=7.2, c_abnormal=7.1,
                                                                    steepness_normal=20, steepness_abnormal=20)
+
 
 # Add FuzzySet objects to simpful system
 # Percentile (BW)
@@ -103,6 +104,7 @@ plt.plot(bw_universe, BW_normal, label="Normal")
 plt.plot(bw_universe, BW_suspicious, label="Suspicious")
 plt.plot(bw_universe, BW_abnormal, label="Abnormal")
 plt.title("Percentile Membership Functions (Suspicious Crossing at 0.5)")
+plt.xlim([min(bw_universe), max(bw_universe)])  # Set x-axis limits to cover the full range
 plt.legend()
 
 # Membership functions for Apgar
@@ -111,6 +113,7 @@ plt.plot(ap_universe, AP_normal, label="Normal")
 plt.plot(ap_universe, AP_suspicious, label="Suspicious")
 plt.plot(ap_universe, AP_abnormal, label="Abnormal")
 plt.title("Apgar Membership Functions (Suspicious Crossing at 0.5)")
+plt.xlim([min(ap_universe), max(ap_universe)])  # Set x-axis limits to cover the full range
 plt.legend()
 
 # Membership functions for Ph
@@ -119,6 +122,7 @@ plt.plot(ph_universe, PH_normal, label="Normal")
 plt.plot(ph_universe, PH_suspicious, label="Suspicious")
 plt.plot(ph_universe, PH_abnormal, label="Abnormal")
 plt.title("Ph Membership Functions (Suspicious Crossing at 0.5)")
+plt.xlim([min(ph_universe), max(ph_universe)])  # Set x-axis limits to cover the full range
 plt.legend()
 
 plt.show()
