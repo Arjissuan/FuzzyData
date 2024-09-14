@@ -50,7 +50,6 @@ AP_normal, AP_suspicious, AP_abnormal = create_crossing_suspicious(ap_universe, 
 PH_normal, PH_suspicious, PH_abnormal = create_crossing_suspicious(ph_universe, c_normal=7.2, c_abnormal=7.1,
                                                                    steepness_normal=20, steepness_abnormal=20)
 
-
 # Add FuzzySet objects to simpful system
 # Percentile (BW)
 FS.add_linguistic_variable("Percentile", sf.LinguisticVariable([
@@ -73,31 +72,55 @@ FS.add_linguistic_variable("Ph", sf.LinguisticVariable([
     sf.FuzzySet(function=sf.Sigmoid_MF(c=7.1, a=-20), term="Abnormal")
 ], universe_of_discourse=[min(ph_values), max(ph_values)]))
 
-# Define constant output values for TSK method
-high_output = 1  # High output for Normal cases
-medium_output = 0.5  # Medium output for Suspicious cases
-low_output = 0  # Low output for Abnormal cases
+# Define output terms using TriangleFuzzySet
+O1 = sf.TriangleFuzzySet(0, 0, 0.5, term="Abnormal")
+O2 = sf.TriangleFuzzySet(0, 0.5, 1, term="Suspicious")
+O3 = sf.TriangleFuzzySet(0.5, 1, 1, term="Normal")
+FS.add_linguistic_variable("output", sf.LinguisticVariable([O1, O2, O3], universe_of_discourse=[0, 1]))
 
-# Add fuzzy rules using TSK-style consequents (numerical outputs)
+# Define fuzzy rules using TSK-style consequents (numerical outputs)
 FS.add_rules([
-    f"IF (Percentile IS Normal) AND (Apgar IS Normal) AND (Ph IS Normal) THEN output = {high_output}",
-    f"IF (Percentile IS Suspicious) OR (Apgar IS Suspicious) OR (Ph IS Suspicious) THEN output = {medium_output}",
-    f"IF (Percentile IS Abnormal) OR (Apgar IS Abnormal) OR (Ph IS Abnormal) THEN output = {low_output}"
+    "IF (Apgar IS Abnormal) AND (Percentile IS Abnormal) AND (Ph IS Abnormal) THEN (output IS Abnormal)",
+    "IF (Apgar IS Abnormal) AND (Percentile IS Abnormal) AND (Ph IS Normal) THEN (output IS Abnormal)",
+    "IF (Apgar IS Abnormal) AND (Percentile IS Abnormal) AND (Ph IS Suspicious) THEN (output IS Abnormal)",
+    "IF (Apgar IS Abnormal) AND (Percentile IS Normal) AND (Ph IS Abnormal) THEN (output IS Abnormal)",
+    "IF (Apgar IS Abnormal) AND (Percentile IS Normal) AND (Ph IS Normal) THEN (output IS Abnormal)",
+    "IF (Apgar IS Abnormal) AND (Percentile IS Normal) AND (Ph IS Suspicious) THEN (output IS Abnormal)",
+    "IF (Apgar IS Abnormal) AND (Percentile IS Suspicious) AND (Ph IS Abnormal) THEN (output IS Abnormal)",
+    "IF (Apgar IS Abnormal) AND (Percentile IS Suspicious) AND (Ph IS Normal) THEN (output IS Abnormal)",
+    "IF (Apgar IS Abnormal) AND (Percentile IS Suspicious) AND (Ph IS Suspicious) THEN (output IS Abnormal)",
+
+    "IF (Apgar IS Normal) AND (Percentile IS Abnormal) AND (Ph IS Abnormal) THEN (output IS Abnormal)",
+    "IF (Apgar IS Normal) AND (Percentile IS Abnormal) AND (Ph IS Normal) THEN (output IS Abnormal)",
+    "IF (Apgar IS Normal) AND (Percentile IS Abnormal) AND (Ph IS Suspicious) THEN (output IS Abnormal)",
+    "IF (Apgar IS Normal) AND (Percentile IS Normal) AND (Ph IS Abnormal) THEN (output IS Abnormal)",
+    "IF (Apgar IS Normal) AND (Percentile IS Normal) AND (Ph IS Normal) THEN (output IS Normal)",
+    "IF (Apgar IS Normal) AND (Percentile IS Normal) AND (Ph IS Suspicious) THEN (output IS Normal)",
+    "IF (Apgar IS Normal) AND (Percentile IS Suspicious) AND (Ph IS Abnormal) THEN (output IS Abnormal)",
+    "IF (Apgar IS Normal) AND (Percentile IS Suspicious) AND (Ph IS Normal) THEN (output IS Normal)",
+    "IF (Apgar IS Normal) AND (Percentile IS Suspicious) AND (Ph IS Suspicious) THEN (output IS Suspicious)",
+
+    "IF (Apgar IS Suspicious) AND (Percentile IS Abnormal) AND (Ph IS Abnormal) THEN (output IS Abnormal)",
+    "IF (Apgar IS Suspicious) AND (Percentile IS Abnormal) AND (Ph IS Normal) THEN (output IS Abnormal)",
+    "IF (Apgar IS Suspicious) AND (Percentile IS Abnormal) AND (Ph IS Suspicious) THEN (output IS Abnormal)",
+    "IF (Apgar IS Suspicious) AND (Percentile IS Normal) AND (Ph IS Abnormal) THEN (output IS Abnormal)",
+    "IF (Apgar IS Suspicious) AND (Percentile IS Normal) AND (Ph IS Normal) THEN (output IS Normal)",
+    "IF (Apgar IS Suspicious) AND (Percentile IS Normal) AND (Ph IS Suspicious) THEN (output IS Normal)",
+    "IF (Apgar IS Suspicious) AND (Percentile IS Suspicious) AND (Ph IS Abnormal) THEN (output IS Abnormal)",
+    "IF (Apgar IS Suspicious) AND (Percentile IS Suspicious) AND (Ph IS Normal) THEN (output IS Suspicious)",
+    "IF (Apgar IS Suspicious) AND (Percentile IS Suspicious) AND (Ph IS Suspicious) THEN (output IS Suspicious)"
 ])
+
 
 # Set input values using set_variable() for an example input
 FS.set_variable("Percentile", bw_values[0])
 FS.set_variable("Apgar", ap_values[0])
 FS.set_variable("Ph", ph_values[0])
 
-# Perform fuzzy inference using Sugeno_inference()
-try:
-    result = FS.Sugeno_inference()
-    print(f"Inference result: {result['output']}")
-except Exception as e:
-    print(f"Error during inference: {e}")
+# Perform fuzzy inference using inference()
+result = FS.inference()
+print(f"Inference result: {result['output']}")
 
-# Plotting membership functions
 # Membership functions for Percentile
 plt.figure()
 plt.plot(bw_universe, BW_normal, label="Normal")
