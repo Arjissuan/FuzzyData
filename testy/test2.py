@@ -8,11 +8,17 @@ from sklearn.model_selection import KFold
 
 # Define G-measure function
 def g_measure(y_true, y_pred):
-    tp = np.sum((y_true == 1) & (y_pred == 1))
-    precision = tp / np.sum(y_pred == 1) if np.sum(y_pred == 1) > 0 else 0
+    """
+    Calculate G-measure directly using continuous predictions.
+    """
+    # Since y_true can be 0, 0.5, or 1, we can keep the prediction as continuous.
+    tp = np.sum((y_true == 1) & (y_pred >= 0.5))  # True positives
+    precision = tp / np.sum(y_pred >= 0.5) if np.sum(y_pred >= 0.5) > 0 else 0
     recall = tp / np.sum(y_true == 1) if np.sum(y_true == 1) > 0 else 0
+
     if precision + recall == 0:
         return 0
+
     g_measure = (2 * precision * recall) / (precision + recall)
     return g_measure
 
@@ -135,38 +141,34 @@ class FuzzyInferenceSystem:
 
     def infer(self, test_data, p_i=1, delta=0):
         """Perform fuzzy inference using specified parameters on test data."""
-        # Prepare the adjusted rules with pi and delta modifications
-        adjusted_rules = []
-        for rule in self.rules:
-            adjusted_rule = rule
-            if "Suspicious_output" in rule:
-                # Adjust pi for suspicious rules
-                adjusted_rule = adjusted_rule.replace("Suspicious_output",
-                                                      f"({p_i} * Suspicious_output + {delta})")
-            adjusted_rules.append(adjusted_rule)
-
-        # Clear the existing rules (if applicable)
-        self.FS._rules = []  # Attempt to clear rules, verify this is supported in simpful
-
-        # Add the adjusted rules back to the fuzzy system
-        for rule in adjusted_rules:
-            # Example: Add rules one by one
-            self.FS.add_rules([rule])
-
-        # Perform fuzzy inference on the test data
         results = []
+
+        # Reinitialize the fuzzy system for each inference run
+        self.FS = sf.FuzzySystem()
+        self._create_fuzzy_variables()  # Re-add fuzzy variables
+        self._add_rules()  # Re-add rules
+
+        # Instead of adjusting rules, adjust the output after inference
         for i in range(len(test_data)):
+            # Set variables for the current instance
             self.FS.set_variable("Percentile", test_data["Percentile"].values[i])
             self.FS.set_variable("Apgar", test_data["Apgar"].values[i])
             self.FS.set_variable("Ph", test_data["Ph"].values[i])
 
-            # Get crisp output after applying delta
             try:
+                # Perform Sugeno inference
                 output_dict = self.FS.Sugeno_inference(["output"])
-                output = output_dict["output"] + delta
 
-                # Optional: Print each output for debugging purposes
-                print(f"Inference result for entry {i}: {output}")  # Debugging line
+                # Ensure "output" exists in the result and add delta
+                if "output" in output_dict:
+                    output = output_dict["output"]
+                    # Apply the p_i and delta adjustment after inference
+                    output = (p_i * output) + delta
+                    # Debugging line to inspect the output
+                    print(f"Inference result for entry {i}: {output}")
+                else:
+                    print(f"Error: Output key not found in inference result: {output_dict}")
+                    output = 0  # Set fallback output in case of issues
             except Exception as e:
                 print(f"Error during inference: {e}")
                 output = 0  # Fallback value in case of error
@@ -179,8 +181,8 @@ class FuzzyInferenceSystem:
 class FuzzyGridSearch(BaseEstimator, ClassifierMixin):
     def __init__(self, data_file, p_i_range=None, delta_range=None):
         self.data_file = data_file
-        self.p_i_range = p_i_range if p_i_range else np.linspace(0.5, 1.5, 10)
-        self.delta_range = delta_range if delta_range else np.linspace(-0.1, 0.1, 5)
+        self.p_i_range = p_i_range if p_i_range else np.arange(-0.5, 0.6, 0.25)
+        self.delta_range = delta_range if delta_range else np.arange(-0.5, 0.6, 0.25)
 
     def fit(self, X=None, y=None):
         # Load dataset into DataFrame
@@ -208,7 +210,7 @@ class FuzzyGridSearch(BaseEstimator, ClassifierMixin):
                     # Perform inference only on test data
                     y_pred = fis.infer(test_data, p_i=p_i, delta=delta)
 
-                    # Evaluate using G-measure
+                    # Evaluate using G-measure without threshold
                     score = g_measure(target_data[test_index], y_pred)
                     scores.append(score)
 
@@ -218,7 +220,7 @@ class FuzzyGridSearch(BaseEstimator, ClassifierMixin):
                     best_p_i = p_i
                     best_delta = delta
 
-        # Save the best parameters and score as attributes of the object
+        # Save the best parameters and score
         self.best_p_i = best_p_i
         self.best_delta = best_delta
         self.best_score = best_score
