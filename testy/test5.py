@@ -4,9 +4,8 @@ import pandas as pd
 import glob
 import os
 
-print()
+
 file_path = glob.glob(f'{os.getcwd()}/FDA_data*')[0]
-print(file_path)
 try:
     data = pd.read_csv(file_path)
 except:
@@ -35,9 +34,11 @@ def ph_membership(ph):
     abnormal = sigmoid(ph, -100, 7.1)
     return normal, suspicious, abnormal
 
+print(ph_membership(data['Ph']))
 
 memberships = []
 for indx, row in data.iterrows():
+    # print(indx, row)
     apgar_mem = apgar_membership(row['Apgar'])
     percentile_mem = percentile_membership(row['Percentile'])
     ph_mem = ph_membership(row['Ph'])
@@ -56,5 +57,11 @@ for indx, row in data.iterrows():
 
 
 memberships_df = pd.DataFrame(memberships)
-print(memberships_df.head())
+print(memberships_df)
 
+
+def rules(ap, perc, ph):
+    rules = {2:[], # normal
+             1:[], # suspicious
+             0:[], # abnormal
+             }

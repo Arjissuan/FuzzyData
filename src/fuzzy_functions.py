@@ -128,7 +128,7 @@ class FuzzyMethods:
         rule23 = ctrl.Rule(self.AP[self.labels[1]] & self.BW[self.labels[0]] & self.ph[self.labels[0]],
                            self.outcome[self.labels[0]])
         rule24 = ctrl.Rule(self.AP[self.labels[1]] & self.BW[self.labels[0]] & self.ph[self.labels[1]],
-                           self.outcome[self.labels[0]])
+                           self.outcome[self.labels[1]])
         rule25 = ctrl.Rule(self.AP[self.labels[1]] & self.BW[self.labels[1]] & self.ph[self.labels[2]],
                            self.outcome[self.labels[2]])
         rule26 = ctrl.Rule(self.AP[self.labels[1]] & self.BW[self.labels[1]] & self.ph[self.labels[0]],
