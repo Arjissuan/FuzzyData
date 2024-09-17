@@ -24,6 +24,7 @@ def g_measure(y_true, y_pred):
     g_measure = (2 * precision * recall) / (precision + recall)
     return g_measure
 
+
 class FuzzyInferenceSystem:
     def __init__(self, dataset):
         # Use the provided dataset
