@@ -114,7 +114,7 @@ FS.add_rules([
     "IF (Apgar IS Suspicious) AND (Percentile IS Suspicious) AND (Ph IS Suspicious) THEN (output IS Abnormal_output)"
 ])
 
-print(FS.rules)
+# print(FS._rules)
 
 # Set input values using set_variable() for an example input
 FS.set_variable("Percentile", bw_values[0])
