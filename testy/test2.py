@@ -5,6 +5,8 @@ import os
 import matplotlib.pyplot as plt
 from sklearn.base import BaseEstimator, ClassifierMixin
 from sklearn.model_selection import KFold
+from sklearn.metrics import confusion_matrix
+
 
 # Define G-measure function
 def g_measure(y_true, y_pred):
@@ -165,7 +167,7 @@ class FuzzyInferenceSystem:
                     # Apply the p_i and delta adjustment after inference
                     output = (p_i * output) + delta
                     # Debugging line to inspect the output
-                    print(f"Inference result for entry {i}: {output}")
+                    # print(f"Inference result for entry {i}: {output}")
                 else:
                     print(f"Error: Output key not found in inference result: {output_dict}")
                     output = 0  # Set fallback output in case of issues
@@ -191,16 +193,20 @@ class FuzzyGridSearch(BaseEstimator, ClassifierMixin):
 
     def grid_search(self, k=5):
         kf = KFold(n_splits=k)
-        best_score = 0
+        best_avg_score = 0
         best_p_i = None
         best_delta = None
+        best_fold_scores = []
+
+        # Track the maximum G-measure across all folds and parameter sets
+        best_individual_g_measure = 0
 
         # Simulate target values as an array
         target_data = np.random.choice([0, 0.5, 1], size=len(self.dataset), p=[0.6, 0.3, 0.1])
 
         for p_i in self.p_i_range:
             for delta in self.delta_range:
-                scores = []
+                fold_scores = []  # To track G-measure for each fold
                 for train_index, test_index in kf.split(self.dataset):
                     train_data, test_data = self.dataset.iloc[train_index], self.dataset.iloc[test_index]
 
@@ -210,29 +216,43 @@ class FuzzyGridSearch(BaseEstimator, ClassifierMixin):
                     # Perform inference only on test data
                     y_pred = fis.infer(test_data, p_i=p_i, delta=delta)
 
-                    # Evaluate using G-measure without threshold
+                    # Evaluate using G-measure
                     score = g_measure(target_data[test_index], y_pred)
-                    scores.append(score)
+                    fold_scores.append(score)
 
-                avg_score = np.mean(scores)
-                if avg_score > best_score:
-                    best_score = avg_score
+                    # Track the highest individual fold G-measure score
+                    if score > best_individual_g_measure:
+                        best_individual_g_measure = score
+
+                # Calculate average G-measure for this parameter combination
+                avg_score = np.mean(fold_scores)
+
+                # If this combination yields a better average score, update best parameters and scores
+                if avg_score > best_avg_score:
+                    best_avg_score = avg_score
                     best_p_i = p_i
                     best_delta = delta
+                    best_fold_scores = fold_scores
 
-        # Save the best parameters and score
+        # Save the best parameters, best average score, and the mean of fold scores for best params
         self.best_p_i = best_p_i
         self.best_delta = best_delta
-        self.best_score = best_score
+        self.best_avg_score = best_avg_score  # Best average G-measure (mean across folds)
+        self.best_fold_scores = best_fold_scores  # Fold-wise G-measure scores for best params
+        self.best_individual_g_measure = best_individual_g_measure  # Best individual G-measure
 
-        return best_p_i, best_delta, best_score
+        # Return the best parameters and scores
+        return best_p_i, best_delta, best_avg_score, best_individual_g_measure
+
 
 # Example usage
 data_file = "FDA_data.xls"
 fuzzy_grid_search = FuzzyGridSearch(data_file=data_file)
 fuzzy_grid_search.fit()  # Ensure dataset is loaded
-fuzzy_grid_search.grid_search()
+best_p_i, best_delta, best_avg_score, mean_g_measure = fuzzy_grid_search.grid_search()
 
-print("Best pi:", fuzzy_grid_search.best_p_i)
-print("Best delta:", fuzzy_grid_search.best_delta)
-print("Best score:", fuzzy_grid_search.best_score)
+print("Best pi:", best_p_i)
+print("Best delta:", best_delta)
+print("Best Average G-Measure Score:", best_avg_score)
+print("Mean G-Measure Score for Best Parameters:", mean_g_measure)
+
